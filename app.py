@@ -8,8 +8,8 @@ Run:
 
 Routes:
     POST /ping       Worked example. Do not change.
-    POST /submit     Submission endpoint (Milestones 3, 4, 5).
-    POST /appeal     Appeal endpoint (Milestone 5).
+    POST /submit     Analyze and classify submitted text.
+    POST /appeal     Appeal an existing classification.
     GET  /log        View audit log.
     GET  /health     Check service health.
 """
@@ -20,6 +20,9 @@ from flask import Flask, jsonify, request
 
 import audit
 import config
+import detector
+import scoring
+import stylometry
 
 
 app = Flask(__name__)
@@ -117,8 +120,6 @@ def health():
     """
     Check whether the service is running and the model is loaded.
     """
-    import detector
-
     loaded = detector._model is not None
 
     return jsonify({
@@ -130,14 +131,15 @@ def health():
     })
 
 
-# ── Submission endpoint — MILESTONE 3 ────────────────────────────────────────
+# ── Submission endpoint — MILESTONES 3, 4 AND 5 ───────────────────────────────
 
 @app.post("/submit")
 # @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
 def submit():
     """
-    Accept a piece of writing, calculate the model signal,
-    log the submission, and return a JSON response.
+    Accept text, calculate both detection signals,
+    combine their scores, classify the writing,
+    and record the decision.
 
     Expected JSON:
         {
@@ -145,15 +147,13 @@ def submit():
             "creator_id": "..."
         }
 
-    Milestone 3:
-        - Validate the submitted text and creator ID.
-        - Generate a unique content ID.
-        - Calculate the GPT-2 model signal.
-        - Record the submission in the audit log.
-        - Return the required response fields.
-
-    Milestone 4 will add the stylometry signal and combined score.
-    Milestone 5 will add the final classification labels.
+    Returns:
+        content_id
+        guess
+        confidence
+        label
+        model_score
+        style_score
     """
 
     # Step 1: Read the JSON request.
@@ -165,7 +165,7 @@ def submit():
             "message": "The request body must be a JSON object.",
         }), 400
 
-    # Step 2: Extract the submitted text and creator ID.
+    # Step 2: Extract the text and creator ID.
     text = payload.get("text")
     creator_id = payload.get("creator_id")
 
@@ -183,31 +183,29 @@ def submit():
             "message": "The creator_id field must be a non-empty string.",
         }), 400
 
-    # Remove unnecessary whitespace.
     text = text.strip()
     creator_id = creator_id.strip()
 
-    # Step 5: Generate a unique identifier for this submission.
+    # Step 5: Generate a unique content ID.
     content_id = str(uuid.uuid4())
 
-    # Step 6: Calculate the real model signal using GPT-2.
-    import detector
-
+    # Step 6: Calculate both signals.
     model_score = detector.model_signal(text)
+    style_score = stylometry.style_signal(text)
 
-    # Milestone 4 will replace this placeholder with a real style score.
-    style_score = 0.0
+    # Step 7: Combine the signals.
+    combined_score = scoring.combine_signals(
+        model_score,
+        style_score,
+    )
 
-    # Milestone 4 will combine both signals.
-    # For now, preserve the real model score for logging.
-    combined_score = model_score
+    # Step 8: Assign the final classification.
+    guess, label = scoring.score_to_label(combined_score)
 
-    # Milestone 5 will calculate the final classification.
-    guess = "unsure"
-    confidence = 0.0
-    label = "Classification pending: second signal not yet implemented."
+    # Classification strength, not a probability of authorship.
+    confidence = round(abs(combined_score - 0.5) * 2, 4)
 
-    # Step 7: Record the submission in the audit log.
+    # Step 9: Record the complete decision.
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
@@ -218,7 +216,7 @@ def submit():
         label=label,
     )
 
-    # Step 8: Return the submission result.
+    # Step 10: Return the result.
     return jsonify({
         "content_id": content_id,
         "guess": guess,
@@ -234,7 +232,7 @@ def submit():
 @app.post("/appeal")
 def appeal():
     """
-    Allow a writer to challenge a classification.
+    Allow a writer to challenge an existing classification.
 
     Expected JSON:
         {
@@ -242,20 +240,92 @@ def appeal():
             "reasoning": "..."
         }
 
-    TODO — Milestone 5:
-        1. Check whether the content ID exists.
-        2. Record the appeal using audit.log_appeal().
-        3. Change the status to under_review.
-        4. Return a confirmation.
+    An appeal:
+        1. Checks that the content ID exists.
+        2. Retrieves the original creator ID.
+        3. Records the appeal in the audit log.
+        4. Sets the item's latest status to under_review.
+        5. Returns a confirmation.
+
+    The audit log is append-only. The original decision
+    remains available for later review.
     """
 
-    payload = request.get_json(silent=True) or {}
+    # Step 1: Read the JSON request.
+    payload = request.get_json(silent=True)
 
+    if not isinstance(payload, dict):
+        return jsonify({
+            "error": "invalid_request",
+            "message": "The request body must be a JSON object.",
+        }), 400
+
+    # Step 2: Extract the appeal information.
+    content_id = payload.get("content_id")
+    reasoning = payload.get("reasoning")
+
+    # Step 3: Validate the content ID.
+    if not isinstance(content_id, str) or not content_id.strip():
+        return jsonify({
+            "error": "invalid_content_id",
+            "message": "A valid content_id is required.",
+        }), 400
+
+    # Step 4: Validate the reasoning.
+    if not isinstance(reasoning, str) or not reasoning.strip():
+        return jsonify({
+            "error": "invalid_reasoning",
+            "message": "Please explain why you are appealing this decision.",
+        }), 400
+
+    content_id = content_id.strip()
+    reasoning = reasoning.strip()
+
+    # Step 5: Find the original submission.
+    entries = audit.entries_for(content_id)
+
+    decisions = [
+        entry for entry in entries
+        if entry.get("status") == "decided"
+    ]
+
+    if not decisions:
+        return jsonify({
+            "error": "content_not_found",
+            "message": "No submission was found with this content ID.",
+        }), 404
+
+    # Step 6: Retrieve the creator ID from the original decision.
+    original_decision = decisions[0]
+    creator_id = original_decision["creator_id"]
+
+    # Step 7: Prevent duplicate appeals.
+    already_appealed = any(
+        entry.get("event") == "appeal"
+        for entry in entries
+    )
+
+    if already_appealed:
+        return jsonify({
+            "error": "already_appealed",
+            "message": "An appeal has already been submitted for this content.",
+            "content_id": content_id,
+            "status": "under_review",
+        }), 409
+
+    # Step 8: Record the appeal and change its latest status.
+    audit.log_appeal(
+        content_id=content_id,
+        creator_id=creator_id,
+        reasoning=reasoning,
+    )
+
+    # Step 9: Confirm the appeal.
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /appeal isn't built yet — see the TODO in app.py.",
-        "you_sent": payload,
-    }), 501
+        "content_id": content_id,
+        "status": "under_review",
+        "message": "Your appeal has been recorded and is awaiting review.",
+    })
 
 
 # ── Audit log — already implemented ──────────────────────────────────────────

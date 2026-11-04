@@ -1,19 +1,15 @@
+
 """
 Turning two numbers into one, and one number into something a person can read.
 ← YOU BUILD THIS IN MILESTONES 4 AND 5
 
-Two functions live here, and both are stubs.
+combine_signals:
+    Combines the GPT-2 model signal and stylometry signal.
 
-`combine_signals` is where your false-positive decision from Milestone 1
-actually gets made. Everything above it — the labels, the appeal path — is
-downstream of a number this function produced.
+score_to_label:
+    Converts the combined score into a reader-facing classification.
 
-`score_to_label` is where you stop writing for a machine and start writing for
-a person. A score of 0.62 means nothing to a writer.
-
-⚠️ Your README's **Signals and Scoring** section has to name the file and
-function holding your combining rule. The grader checks your code against what
-you claim, so that line should read `scoring.py::combine_signals`.
+The combining rule is implemented in scoring.py::combine_signals.
 """
 
 import config
@@ -21,85 +17,93 @@ import config
 
 def combine_signals(model_score: float, style_score: float) -> float:
     """
-    Combine two 0–1 signals into one 0–1 score. ← TODO (Milestone 4)
+    Combine two signals into one score between 0 and 1.
 
-    Both inputs point the same way: higher means more likely AI. Your output
-    should too.
+    Both signals use the same direction:
+        0.0 = more human-like
+        1.0 = more AI-like
+
+    The model signal measures text predictability.
+    The style signal measures structural writing patterns.
+
+    Combining rule:
+        combined_score = (0.5 * model_score) + (0.5 * style_score)
+
+    The weights are defined in config.py.
+
+    When the signals disagree, the weighted average moves
+    toward the middle, reflecting uncertainty.
+
+    This is intentional because falsely accusing a human
+    writer is more harmful than missing some AI-generated text.
 
     Args:
-        model_score: from `detector.model_signal` — how predictable the text is.
-        style_score: from `stylometry.style_signal` — the shape of the text.
+        model_score: GPT-2 model signal, between 0 and 1.
+        style_score: Stylometry signal, between 0 and 1.
 
     Returns:
-        A float from 0.0 (confidently human) to 1.0 (confidently AI).
-
-    ⚠️ **Write the rule down before you code it, and put the numbers in your
-    README.** A weighted average is the obvious choice and it is not the only
-    one. Things worth thinking about:
-
-      - **What happens when they disagree?** One signal at 0.9 and the other at
-        0.1 averages to 0.5 — "unsure". Is that what you want? It might be
-        exactly right: two methods disagreeing IS uncertainty. Or you might
-        decide one signal is more trustworthy when they split.
-
-      - **Which way do you want to be wrong?** Weighting toward the signal that
-        reads more human means fewer false accusations and more AI text
-        getting through. There's no weighting that avoids the trade.
-
-      - Milestone 4 asks you to find a case where your two signals split and
-        write it down. That case is what this rule exists to handle.
-
-    The weights in config.py are placeholders. Change them, or ignore them and
-    write a different rule.
+        Combined score between 0 and 1.
     """
-    # TODO: replace this
-    return (
+
+    combined_score = (
         config.WEIGHT_MODEL_SIGNAL * model_score
         + config.WEIGHT_STYLE_SIGNAL * style_score
     )
 
+    # Ensure the final score stays within the expected range.
+    combined_score = max(0.0, min(combined_score, 1.0))
+
+    return round(combined_score, 4)
+
 
 def score_to_label(score: float) -> tuple[str, str]:
     """
-    Turn a score into a guess and the text a reader actually sees.
-    ← TODO (Milestone 5)
+    Convert a combined score into a classification and
+    a reader-friendly explanation.
 
     Returns:
-        (guess, label_text) — where `guess` is a short machine-readable string
-        like "ai" / "human" / "unsure", and `label_text` is the full sentence
-        shown to a person.
+        (guess, label_text)
 
-    ⚠️ Write the label text for someone who has never heard the word
-    "threshold".
+    Classification thresholds:
+        score <= 0.35: human
+        0.35 < score < 0.65: unsure
+        score >= 0.65: ai
 
-        ✗ "human, 0.81 confidence"
-        ✓ "We think this was probably written by a person."
-
-    All three labels have to be **reachable**. If no score can produce one of
-    them, your ranges have a gap — and Milestone 5 asks you to submit text that
-    produces each one, which is how you'd find out.
-
-    The hardest one to write is "unsure". It has to admit uncertainty without
-    sounding like an accusation, because the person reading it may well have
-    written every word themselves. Your breakout asks your group what they'd
-    think if they got it on their own work. That question is the whole
-    milestone.
+    These classifications describe patterns in the text.
+    They do not establish authorship.
     """
-    # TODO: replace this — thresholds are in config.py
+
     if score >= config.AI_THRESHOLD:
-        return "ai", "PLACEHOLDER — write the high-confidence AI label."
+        return (
+            "ai",
+            "This writing shows patterns associated with AI-generated "
+            "text, but this result is not proof of AI use."
+        )
+
     if score <= config.HUMAN_THRESHOLD:
-        return "human", "PLACEHOLDER — write the high-confidence human label."
-    return "unsure", "PLACEHOLDER — write the unsure label."
+        return (
+            "human",
+            "This writing appears more consistent with human-written "
+            "text, but we cannot verify its authorship."
+        )
+
+    return (
+        "unsure",
+        "We cannot confidently determine whether this writing was "
+        "created by a person or AI. This result is not an accusation."
+    )
 
 
 def label_ranges() -> list[tuple[str, str]]:
     """
-    The score range each label covers. Your README needs these beside the
-    label text — given to you so the numbers can't drift apart from config.py.
+    The score range each label covers.
+
+    Thresholds come from config.py so the ranges remain
+    consistent with the classification logic.
     """
+
     return [
         ("high-confidence human", f"0.00 – {config.HUMAN_THRESHOLD:.2f}"),
-        ("unsure", f"{config.HUMAN_THRESHOLD:.2f} – {config.AI_THRESHOLD:.2f}"),
+        ("unsure", f">{config.HUMAN_THRESHOLD:.2f} – <{config.AI_THRESHOLD:.2f}"),
         ("high-confidence AI", f"{config.AI_THRESHOLD:.2f} – 1.00"),
     ]

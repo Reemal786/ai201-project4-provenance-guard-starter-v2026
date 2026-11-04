@@ -1,3 +1,4 @@
+
 # Acceptance criteria — Provenance Guard
 
 Five criteria that say what "working" means for this service, written in unit 7
@@ -42,63 +43,54 @@ Two things worth knowing before you pick numbers:
   a **miss**.
 
 ---
-## 1.
 
-<!-- Your criterion. It must name a number. -->
+## 1. Minimize false accusations against human writers
 
-
+Of 10 pieces of human-written text, no more than 1 should receive a high-confidence AI label in each trial.
 
 **Why this target:**
 
-
+A false accusation can damage a writer's credibility and unfairly question the originality of their work. I chose a maximum false-positive rate of 10% because protecting human writers should take priority over detecting every instance of AI-generated writing.
 
 ---
 
-## 2.
+## 2. Distinguish between clearly AI-generated and human-written text
 
-<!-- Your criterion. -->
-
-
+Across 10 clearly AI-generated and 10 clearly human-written samples, the average combined score for AI-generated text should be at least 0.20 higher than the average score for human-written text in each trial.
 
 **Why this target:**
 
-
+The detector should demonstrate a measurable difference between AI-generated and human-written text. A minimum average score difference of 0.20 provides a meaningful separation without expecting perfect detection, which is unrealistic given the limitations of both signals.
 
 ---
 
-## 3.
+## 3. Make all three classification labels reachable
 
-<!-- Your criterion. -->
-
-
+The system must successfully produce all three classifications—high-confidence human, unsure, and high-confidence AI—using at least one test input for each label in every trial.
 
 **Why this target:**
 
-
+Each classification serves a different purpose. The unsure label is particularly important because the system should acknowledge uncertainty instead of forcing every submission into a human or AI category.
 
 ---
 
-## 4.
+## 4. Record and process every valid appeal
 
-<!-- Your criterion. -->
-
-
+For 5 valid appeals associated with existing content IDs, all 5 must return a successful response, create an audit log entry, and record the submission's status as `under_review` in every trial.
 
 **Why this target:**
 
-
+Writers should have a reliable way to challenge potentially incorrect classifications. A 100% success target is appropriate because the appeal process is essential for accountability and should not depend on the detector's accuracy.
 
 ---
 
-## 5.
+## 5. Handle invalid submissions without crashing
 
-<!-- Your criterion. -->
-
-
+For 10 invalid submissions, including missing text, empty text, incorrect data types, and excessively long inputs, all 10 must return an appropriate client-error response (HTTP 400 or 413) without causing an unhandled exception or stopping the service in every trial.
 
 **Why this target:**
 
-
+A reliable service must handle unexpected or malformed input safely. I chose a 100% target because input validation is a basic requirement for a functional API, and invalid submissions should never cause the application to crash.
 
 ---
 
@@ -127,7 +119,7 @@ Two things worth knowing before you pick numbers:
      you the point:
 
          ✗ "At most 1 of 10 of my own pieces flagged as AI" → "at most 3
-            of 10", because 1 of 10 turned out to be hard.
+           of 10", because 1 of 10 turned out to be hard.
 
      A number you missed stays where it is, gets diagnosed, and gets a fix
      attempted. That's where the points are.

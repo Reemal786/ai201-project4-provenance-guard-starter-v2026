@@ -113,7 +113,7 @@ def ping():
     })
 
 
-# ── Health check — already implemented ───────────────────────────────────────
+# ── Health check ──────────────────────────────────────────────────────────────
 
 @app.get("/health")
 def health():
@@ -186,26 +186,36 @@ def submit():
     text = text.strip()
     creator_id = creator_id.strip()
 
-    # Step 5: Generate a unique content ID.
+    # Step 5: Reject excessively long text before model inference.
+    if len(text) > config.MAX_TEXT_LENGTH:
+        return jsonify({
+            "error": "text_too_long",
+            "message": (
+                f"The text must not exceed "
+                f"{config.MAX_TEXT_LENGTH} characters."
+            ),
+        }), 413
+
+    # Step 6: Generate a unique content ID.
     content_id = str(uuid.uuid4())
 
-    # Step 6: Calculate both signals.
+    # Step 7: Calculate both signals.
     model_score = detector.model_signal(text)
     style_score = stylometry.style_signal(text)
 
-    # Step 7: Combine the signals.
+    # Step 8: Combine the signals.
     combined_score = scoring.combine_signals(
         model_score,
         style_score,
     )
 
-    # Step 8: Assign the final classification.
+    # Step 9: Assign the final classification.
     guess, label = scoring.score_to_label(combined_score)
 
     # Classification strength, not a probability of authorship.
     confidence = round(abs(combined_score - 0.5) * 2, 4)
 
-    # Step 9: Record the complete decision.
+    # Step 10: Record the complete decision.
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
@@ -216,7 +226,7 @@ def submit():
         label=label,
     )
 
-    # Step 10: Return the result.
+    # Step 11: Return the result.
     return jsonify({
         "content_id": content_id,
         "guess": guess,
@@ -239,13 +249,6 @@ def appeal():
             "content_id": "...",
             "reasoning": "..."
         }
-
-    An appeal:
-        1. Checks that the content ID exists.
-        2. Retrieves the original creator ID.
-        3. Records the appeal in the audit log.
-        4. Sets the item's latest status to under_review.
-        5. Returns a confirmation.
 
     The audit log is append-only. The original decision
     remains available for later review.
@@ -313,7 +316,7 @@ def appeal():
             "status": "under_review",
         }), 409
 
-    # Step 8: Record the appeal and change its latest status.
+    # Step 8: Record the appeal.
     audit.log_appeal(
         content_id=content_id,
         creator_id=creator_id,
@@ -328,7 +331,7 @@ def appeal():
     })
 
 
-# ── Audit log — already implemented ──────────────────────────────────────────
+# ── Audit log ─────────────────────────────────────────────────────────────────
 
 @app.get("/log")
 def get_log():
@@ -360,7 +363,6 @@ def main():
     print('    -d \'{"message": "hello"}\'')
     print()
 
-    # debug=True is intended for local development only.
     app.run(
         host=config.HOST,
         port=config.PORT,

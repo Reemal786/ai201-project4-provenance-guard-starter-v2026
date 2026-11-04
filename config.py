@@ -1,3 +1,4 @@
+
 """
 Settings for Provenance Guard.
 
@@ -28,6 +29,7 @@ DEBUG = os.getenv("AI201_DEBUG", "1") == "1" and HOST in ("127.0.0.1", "localhos
 
 
 # ─── The local model ─────────────────────────────────────────────────────────
+
 # Your first signal runs a language model ON YOUR OWN MACHINE. No account, no
 # key, no card. It downloads about 550 MB the first time — do that before
 # class, not during it.
@@ -46,46 +48,44 @@ DETECTOR_MODEL = os.getenv("AI201_DETECTOR_MODEL", "gpt2")
 # 300 words, which is enough for the signal to mean something.
 DETECTOR_MAX_TOKENS = 400
 
+# Reject excessively long submissions before running the detector.
+# This is a character limit, separate from the model's token limit.
+MAX_TEXT_LENGTH = 10000
+
 
 # ─── Scoring (Milestone 4) ───────────────────────────────────────────────────
+
 # How much each signal counts toward the combined score.
 #
-# ⚠️ These are placeholders. Milestone 4 asks you to write your combining rule
-# down BEFORE you code it, and to put the numbers in your README. Whatever you
-# decide, it goes here.
+# Both signals contribute equally. When they disagree, the combined score
+# moves toward the unsure range.
 
 WEIGHT_MODEL_SIGNAL = 0.5
 WEIGHT_STYLE_SIGNAL = 0.5
 
 
 # ─── Thresholds (Milestone 5) ────────────────────────────────────────────────
-# Where one label becomes another. Scores run 0.0 (confidently human) to 1.0
-# (confidently AI).
+
+# Where one label becomes another. Scores run from 0.0 (more human-like)
+# to 1.0 (more AI-like).
 #
-#   score < HUMAN_THRESHOLD          -> high-confidence human
-#   between the two                  -> unsure
-#   score > AI_THRESHOLD             -> high-confidence AI
+#   score <= HUMAN_THRESHOLD          -> high-confidence human
+#   between the two thresholds        -> unsure
+#   score >= AI_THRESHOLD             -> high-confidence AI
 #
-# ⚠️ This is where your false-positive decision from Milestone 1 actually gets
-# made. Widening the unsure band means fewer wrong accusations and more AI text
-# getting through. There is no setting that avoids the trade — only settings
-# that decide who pays for it.
+# Widening the unsure band reduces confident classifications but may help
+# avoid unsupported accusations. These scores are not proof of authorship.
 
 HUMAN_THRESHOLD = 0.35
 AI_THRESHOLD = 0.65
 
-# ⚠️ One thing that catches people out in Milestone 5. A weighted average can
-# only land between its two inputs — so while `style_signal` is still the stub
-# returning 0.5, the combined score can never leave 0.25–0.75 no matter what
-# the model signal says, and the human label needs a model score below 0.20 to
-# be reachable at all.
-#
-# If a label you can't reach is the problem, the fix is upstream of the
-# thresholds: a style signal that actually varies. `scoring.label_ranges()`
-# prints the bands; the reachable range is a different question.
+# A weighted average can only land between its two inputs. While the style
+# signal is fixed at 0.5, the combined score cannot leave 0.25–0.75.
+# Our implemented stylometry signal now varies with the submitted text.
 
 
 # ─── Rate limiting (UNIT 8) ──────────────────────────────────────────────────
+
 # Off in unit 7. You turn it on and choose the numbers in unit 8, Milestone 1.
 #
 # Think about two people: a real writer submitting their own work a few times

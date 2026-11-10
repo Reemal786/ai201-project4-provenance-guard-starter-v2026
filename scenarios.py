@@ -6,7 +6,7 @@ Criteria:
 1. Human-writing false positives
 2. Human vs. AI combined-score separation
 3. All three labels are reachable
-4. Appeals (tested manually because run_eval.py only calls /submit)
+4. Appeals (tested separately because run_eval.py only calls /submit)
 5. Invalid-input handling
 
 Each scenario is executed three times by run_eval.py.
@@ -22,7 +22,7 @@ HUMAN_TEXTS = [
 
     """The first step in analyzing data and creating visualizations is data cleaning. For our project, we acquired data from three different sources with three different levels of standardization: median household income for families in NYC standardized by community districts, COVID-19 cases in New York City standardized by zip codes, and rental inventory data standardized by neighborhoods. Before beginning the process of data cleaning, we needed to decide on a certain geo-organization level by which to organize the data. We concluded organizing the date based on community districts. The benefit of this organization is that it would allow for the comparison of data based on a common point, the community district. One of the major disadvantages of this is the loss of detail in the data. This loss of detail occurs because organization based on community district is broader than organization by zip codes or neighborhoods. Although the loss of detail has implications on our findings, we were unable to acquire median household income data based on zip codes or neighborhoods. Furthermore, reformatting median household income data to organize it by neighborhoods or zip codes would not provide an accurate representation of the data.""",
 
-    """The act of refusing to learn anything especially work taught in school has never been heard of. Until I came across Herbert Kohls “I won’t learn from you”. In this excerpt, Herbert recalls three different students with both different economical and social backgrounds who refused to take part in leaning the fundamentals taught in Herbert’s class. Out of all three of the youngsters, Akmir, Barry, and Rick I’ve shown a keen interest in Ricks refusal to learn. What sparked an interest in me about Rick was that the reason he refused to learn was not because he didn’t have the ability to learn, quite the contrary, but because he didn’t agree against the idea of students being tests and measured against each other. For instance, Rick recalls that the hardest thing that he had to not learn was algebra. Although he refused to learn, he believed that algebra could have be as interesting to him as chess was. As stated in “I won’t learn from you”, “In order to force failure [in algebra] Rick found ingenious ways to dissolve equations into marks on the page by creating visual exercises.” Algebra wasn’t like any other subject’s Rick refused to learn because refusing algebra was just as hard as trying to learn. Reading Ricks story made me realize that I have something in common with him. Although there are times where I have refused to learn, what I believe to be the most common similarity is his belief that the world has been pulled part by greed and competition which is one of the reasons why he began his band after dropping out. Although I might share this common belief the ability to refuse to learn and get away with it seems so bizarre. I cannot imagine a life full of success and freedom without some sort of education. I believe that in the world that we leave in today education is such an important part of our life granted we spend most of it trying to achieve any sort of recognition or attention""",
+    """The act of refusing to learn anything especially work taught in school has never been heard of. Until I came across Herbert Kohls “I won’t learn from you”. In this excerpt, Herbert recalls three different students with both different economical and social backgrounds who refused to take part in leaning the fundamentals taught in Herbert’s class. Out of all three of the youngsters, Akmir, Barry, and Rick I’ve shown a keen interest in Ricks refusal to learn. What sparked an interest in me about Rick was that the reason he refused to learn was not because he didn’t have the ability to learn, quite the contrary, but because he didn’t agree against the idea of students being tests and measured against each other. For instance, Rick recalls that the hardest thing that he had to not learn was algebra. Although he refused to learn, he believed that algebra could have be as interesting to him as chess was. As stated by “I won’t learn from you”, “In order to force failure [in algebra] Rick found ingenious ways to dissolve equations into marks on the page by creating visual exercises.” Algebra wasn’t like any other subject’s Rick refused to learn because refusing algebra was just as hard as trying to learn. Reading Ricks story made me realize that I have something in common with him. Although there are times where I have refused to learn, what I believe to be the most common similarity is his belief that the world has been pulled part by greed and competition which is one of the reasons why he began his band after dropping out. Although I might share this common belief the ability to refuse to learn and get away with it seems so bizarre. I cannot imagine a life full of success and freedom without some sort of education. I believe that in the world that we leave in today education is such an important part of our life granted we spend most of it trying to achieve any sort of recognition or attention""",
 
     """The consumption of sugar has become a part of our daily routine, from the snicker bars we eat to the beverages we buy at the end of our day. Over the past few years, the sugar intake of Americans has dramatically increased causing concern for organizations such as the US Food and Drug Administration (FDA). With this knowledge, the question about whether to regulate the amount of sugar added in soda and other sweetened beverages in order to reverse the effects of such a high intake has brought up several conflicting viewpoints. However, sugar intake should be restricted in order to prevent dangerous consequences such as deadly diseases, addiction and similar effects of alcohol.""",
 
@@ -63,6 +63,8 @@ AI_TEXTS = [
 
 # A separate set of examples for label coverage.
 # These are candidate inputs, not guaranteed classifications.
+# FP08 is a short genuine-human sample from the attack set.
+# It is included to test label reachability, not detector accuracy.
 
 LABEL_COVERAGE_TEXTS = [
     HUMAN_TEXTS[0],
@@ -71,9 +73,11 @@ LABEL_COVERAGE_TEXTS = [
     AI_TEXTS[2],
     AI_TEXTS[7],
     HUMAN_TEXTS[8],
+    "Went for a run. Legs hurt. Worth it.",
 ]
 
 # Ten invalid request bodies for Criterion 5.
+
 INVALID_BODIES = [
     {"text": "", "creator_id": "eval_invalid_01"},
     {"text": "   ", "creator_id": "eval_invalid_02"},
@@ -163,4 +167,5 @@ def validate() -> list[str]:
                     f"scenario {i} ('{scenario.get('name')}'), text {j} is still "
                     f"the placeholder"
                 )
+
     return problems

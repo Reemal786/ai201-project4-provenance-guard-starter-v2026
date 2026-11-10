@@ -34,7 +34,7 @@ DEBUG = os.getenv("AI201_DEBUG", "1") == "1" and HOST in ("127.0.0.1", "localhos
 # key, no card. It downloads about 550 MB the first time — do that before
 # class, not during it.
 #
-# What it measures: how *predictable* your text is to a language model. Text a
+# What it measures: how predictable your text is to a language model. Text a
 # model finds easy to predict tends to be text a model wrote.
 #
 # The first call is the slow one — ten to twenty seconds while the model loads,
@@ -69,9 +69,9 @@ WEIGHT_STYLE_SIGNAL = 0.5
 # Where one label becomes another. Scores run from 0.0 (more human-like)
 # to 1.0 (more AI-like).
 #
-#   score <= HUMAN_THRESHOLD          -> high-confidence human
-#   between the two thresholds        -> unsure
-#   score >= AI_THRESHOLD             -> high-confidence AI
+#   score <= HUMAN_THRESHOLD       -> high-confidence human
+#   between the two thresholds     -> unsure
+#   score >= AI_THRESHOLD          -> high-confidence AI
 #
 # Widening the unsure band reduces confident classifications but may help
 # avoid unsupported accusations. These scores are not proof of authorship.
@@ -79,27 +79,30 @@ WEIGHT_STYLE_SIGNAL = 0.5
 HUMAN_THRESHOLD = 0.35
 AI_THRESHOLD = 0.65
 
-# A weighted average can only land between its two inputs. While the style
-# signal is fixed at 0.5, the combined score cannot leave 0.25–0.75.
-# Our implemented stylometry signal now varies with the submitted text.
+# A weighted average can only land between its two inputs.
+# Our implemented stylometry signal varies with the submitted text.
 
 
 # ─── Rate limiting (UNIT 8) ──────────────────────────────────────────────────
 
-# Off in unit 7. You turn it on and choose the numbers in unit 8, Milestone 1.
+# Enabled for Unit 8, Milestone 1.
 #
-# Think about two people: a real writer submitting their own work a few times
-# an hour, and a script sending a thousand variations to map your thresholds.
-# Your README has to say why your numbers and not others.
+# 10 requests per minute allows reasonable retries and revisions while
+# limiting rapid automated attempts to probe detection thresholds.
+#
+# 200 requests per day accommodates normal use and testing while placing
+# a ceiling on repeated automated submissions.
+#
+# The README documents why these values were selected.
 
-RATE_LIMITING_ENABLED = os.getenv("AI201_RATE_LIMITS", "0") == "1"
+RATE_LIMITING_ENABLED = os.getenv("AI201_RATE_LIMITS", "1") == "1"
 
 RATE_LIMIT_PER_MINUTE = 10
 RATE_LIMIT_PER_DAY = 200
 
-# Flask-Limiter warns loudly without this. In-memory is right for one laptop
-# and wrong for anything real — a restart forgets every count, and two copies
-# of the service wouldn't share limits.
+# In-memory storage is appropriate for this local prototype.
+# Counters reset when the service restarts and are not shared between
+# multiple service instances.
 RATE_LIMIT_STORAGE = "memory://"
 
 

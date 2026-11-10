@@ -29,16 +29,14 @@ app = Flask(__name__)
 
 
 # ── Rate limiting — UNIT 8 ────────────────────────────────────────────────────
-# Rate limiting stays disabled until Unit 8.
-# To enable it later:
-#   1. Set RATE_LIMITING_ENABLED = True in config.py.
-#   2. Choose your rate limits.
-#   3. Uncomment the @limiter.limit(...) decorator on /submit.
 
+# Rate limiting is enabled through config.py.
+# The limiter identifies callers by creator_id when available.
+# Otherwise, it falls back to their IP address.
 
 class _LimiterOff:
     """
-    Placeholder limiter used while rate limiting is disabled.
+    Placeholder limiter used when rate limiting is disabled.
     """
 
     def limit(self, *args, **kwargs):
@@ -63,7 +61,7 @@ if config.RATE_LIMITING_ENABLED:
         creator = payload.get("creator_id")
 
         if isinstance(creator, str) and creator.strip():
-            return creator
+            return creator.strip()
 
         return get_remote_address()
 
@@ -134,7 +132,10 @@ def health():
 # ── Submission endpoint — MILESTONES 3, 4 AND 5 ───────────────────────────────
 
 @app.post("/submit")
-# @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
+@limiter.limit(
+    f"{config.RATE_LIMIT_PER_MINUTE}/minute;"
+    f"{config.RATE_LIMIT_PER_DAY}/day"
+)
 def submit():
     """
     Accept text, calculate both detection signals,
@@ -353,7 +354,7 @@ def get_log():
 def main():
     print(f"Provenance Guard on http://{config.HOST}:{config.PORT}")
     print(f"  detector model:  {config.DETECTOR_MODEL}")
-    print(f"  rate limiting:   {'ON' if config.RATE_LIMITING_ENABLED else 'off (unit 8)'}")
+    print(f"  rate limiting:   {'ON' if config.RATE_LIMITING_ENABLED else 'off'}")
     print(f"  audit log:       {config.AUDIT_LOG}")
     print()
 

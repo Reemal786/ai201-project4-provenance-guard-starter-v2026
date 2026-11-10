@@ -34,6 +34,7 @@ app = Flask(__name__)
 # The limiter identifies callers by creator_id when available.
 # Otherwise, it falls back to their IP address.
 
+
 class _LimiterOff:
     """
     Placeholder limiter used when rate limiting is disabled.
@@ -201,7 +202,23 @@ def submit():
     content_id = str(uuid.uuid4())
 
     # Step 7: Calculate both signals.
-    model_score = detector.model_signal(text)
+    # UNIT 8 IMPROVEMENT:
+    # Handle text that is too short for the detector to score.
+    # Return a controlled HTTP 400 instead of an internal server error.
+    try:
+        model_score = detector.model_signal(text)
+    except ValueError as exc:
+        audit.log_rejection(
+            creator_id=creator_id,
+            reason="detector_invalid_text",
+            limit=str(exc),
+        )
+
+        return jsonify({
+            "error": "text_too_short",
+            "message": str(exc),
+        }), 400
+
     style_score = stylometry.style_signal(text)
 
     # Step 8: Combine the signals.

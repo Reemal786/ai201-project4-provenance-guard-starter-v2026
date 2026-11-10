@@ -1,0 +1,235 @@
+{
+  "criterion": 4,
+  "target": "Five valid appeals succeed per trial, across three trials.",
+  "trials": 3,
+  "total_appeals": 15,
+  "passed": 15,
+  "failed": 0,
+  "results": [
+    {
+      "trial": 1,
+      "sample": 1,
+      "creator_id": "appeal_trial_1_sample_1_002c437a",
+      "submit_status": 200,
+      "content_id": "2a0d4a55-5666-4062-b6de-d8c54774ebc0",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "2a0d4a55-5666-4062-b6de-d8c54774ebc0",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 1,
+      "sample": 2,
+      "creator_id": "appeal_trial_1_sample_2_6ef09abf",
+      "submit_status": 200,
+      "content_id": "eb901915-5a96-4530-988d-bf9758f8bcea",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "eb901915-5a96-4530-988d-bf9758f8bcea",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 1,
+      "sample": 3,
+      "creator_id": "appeal_trial_1_sample_3_672ee973",
+      "submit_status": 200,
+      "content_id": "e00636a3-53ac-46f5-a5b8-775698bb2a34",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "e00636a3-53ac-46f5-a5b8-775698bb2a34",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 1,
+      "sample": 4,
+      "creator_id": "appeal_trial_1_sample_4_0888510c",
+      "submit_status": 200,
+      "content_id": "1c007592-58bc-42c5-ac6a-ded76cff938c",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "1c007592-58bc-42c5-ac6a-ded76cff938c",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 1,
+      "sample": 5,
+      "creator_id": "appeal_trial_1_sample_5_1aa4d58c",
+      "submit_status": 200,
+      "content_id": "4af396f8-dd23-4318-a237-1a7d06337afd",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "4af396f8-dd23-4318-a237-1a7d06337afd",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 2,
+      "sample": 1,
+      "creator_id": "appeal_trial_2_sample_1_1dca1db8",
+      "submit_status": 200,
+      "content_id": "bed8ed04-b378-438f-a93b-63749bbf3e89",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "bed8ed04-b378-438f-a93b-63749bbf3e89",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 2,
+      "sample": 2,
+      "creator_id": "appeal_trial_2_sample_2_87986d92",
+      "submit_status": 200,
+      "content_id": "6e997054-e94d-4206-aa99-8f5ee143ce2f",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "6e997054-e94d-4206-aa99-8f5ee143ce2f",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 2,
+      "sample": 3,
+      "creator_id": "appeal_trial_2_sample_3_95e340e8",
+      "submit_status": 200,
+      "content_id": "dc72a3f8-502b-4acd-9993-ac31c9a4094c",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "dc72a3f8-502b-4acd-9993-ac31c9a4094c",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 2,
+      "sample": 4,
+      "creator_id": "appeal_trial_2_sample_4_c31067a2",
+      "submit_status": 200,
+      "content_id": "18698ec5-9fb3-41ad-9f0a-405fa8bb02be",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "18698ec5-9fb3-41ad-9f0a-405fa8bb02be",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 2,
+      "sample": 5,
+      "creator_id": "appeal_trial_2_sample_5_695fc340",
+      "submit_status": 200,
+      "content_id": "69e31b48-e0e8-4283-b16d-2650da689413",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "69e31b48-e0e8-4283-b16d-2650da689413",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 3,
+      "sample": 1,
+      "creator_id": "appeal_trial_3_sample_1_0c84d4c3",
+      "submit_status": 200,
+      "content_id": "ae569877-9736-41c7-aabc-b5f9a2edb747",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "ae569877-9736-41c7-aabc-b5f9a2edb747",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 3,
+      "sample": 2,
+      "creator_id": "appeal_trial_3_sample_2_f6c2fa6f",
+      "submit_status": 200,
+      "content_id": "f6b38cb6-27c0-4358-adc5-dd8c123154b7",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "f6b38cb6-27c0-4358-adc5-dd8c123154b7",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 3,
+      "sample": 3,
+      "creator_id": "appeal_trial_3_sample_3_e70d2f8d",
+      "submit_status": 200,
+      "content_id": "c9d10891-07f0-45a9-ae13-c42dba4a0763",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "c9d10891-07f0-45a9-ae13-c42dba4a0763",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 3,
+      "sample": 4,
+      "creator_id": "appeal_trial_3_sample_4_a9d3645f",
+      "submit_status": 200,
+      "content_id": "a5e337ef-1e21-4bd3-a7e9-f415ca5fed8d",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "a5e337ef-1e21-4bd3-a7e9-f415ca5fed8d",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    },
+    {
+      "trial": 3,
+      "sample": 5,
+      "creator_id": "appeal_trial_3_sample_5_493a3c96",
+      "submit_status": 200,
+      "content_id": "f5c84cb4-1dc3-4694-83c3-1d5a8e5e1203",
+      "appeal_status": 200,
+      "appeal_response": {
+        "content_id": "f5c84cb4-1dc3-4694-83c3-1d5a8e5e1203",
+        "message": "Your appeal has been recorded and is awaiting review.",
+        "status": "under_review"
+      },
+      "audit_verified": true,
+      "passed": true
+    }
+  ]
+}

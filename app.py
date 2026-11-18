@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Provenance Guard — the web service.
@@ -205,8 +204,10 @@ def submit():
     # UNIT 8 IMPROVEMENT:
     # Handle text that is too short for the detector to score.
     # Return a controlled HTTP 400 instead of an internal server error.
+
     try:
         model_score = detector.model_signal(text)
+
     except ValueError as exc:
         audit.log_rejection(
             creator_id=creator_id,
@@ -218,6 +219,33 @@ def submit():
             "error": "text_too_short",
             "message": str(exc),
         }), 400
+
+    # CAPSTONE EXTENSION — SHAPE B:
+    # Handle unexpected detector failures without exposing
+    # internal exception details to the API caller.
+    #
+    # Record the failure in the audit log and return HTTP 503.
+    # This preserves the existing ValueError behavior above.
+
+    except Exception as exc:
+        app.logger.exception(
+            "Unexpected detector failure for content_id=%s",
+            content_id,
+        )
+
+        audit.log_detector_failure(
+            content_id=content_id,
+            creator_id=creator_id,
+            error_type=type(exc).__name__,
+        )
+
+        return jsonify({
+            "error": "detector_unavailable",
+            "message": (
+                "The detection service is temporarily unavailable. "
+                "Please try again later."
+            ),
+        }), 503
 
     style_score = stylometry.style_signal(text)
 

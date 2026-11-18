@@ -306,3 +306,75 @@ is evidence, and the entries you paste into your README are what unit 8 grades.
 
 **Do not delete and recreate this repository.** You submit the same URL both
 units.
+
+
+## Capstone — Local with Logs
+
+### Running the Capstone
+
+The capstone extends Provenance Guard with graceful detector failure
+handling and structured request logging.
+
+The application continues to run locally using Flask.
+
+Start the application:
+
+```cmd
+python app.py
+```
+
+In a second terminal, check the service:
+
+```cmd
+curl.exe http://127.0.0.1:5000/health
+```
+
+### Running the Capstone Tests
+
+Run the automated extension tests:
+
+```cmd
+python -m unittest test_capstone.py -v
+```
+
+These tests verify:
+- Unexpected detector failures return HTTP 503.
+- Internal exception messages are not exposed to callers.
+- Detector failures are recorded in the audit log.
+- Existing invalid-input handling remains functional.
+
+### Structured Request Logs
+
+The capstone adds a separate request log:
+
+`logs/requests.jsonl`
+
+Each request record contains:
+- Timestamp
+- Unique request ID
+- Endpoint and HTTP method
+- HTTP response status
+- Execution time in milliseconds
+- Error category, when applicable
+
+The original `logs/audit.jsonl` remains responsible for
+classification decisions, appeals, and rejection records.
+
+### Performance Measurement
+
+Request execution time is measured using Python's
+`time.perf_counter()`.
+
+The `duration_ms` field records elapsed request-processing time
+in milliseconds.
+
+This measures latency rather than CPU utilization or monetary cost.
+
+### Limitations
+
+- The system runs locally rather than on a public server.
+- The GPT-2 model may take longer to load on the first request.
+- Performance depends on the computer running the application.
+- Rate limiting uses in-memory storage.
+- The HTTP 503 handler covers unexpected detector exceptions,
+  not failures in every component of the application.

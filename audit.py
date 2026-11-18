@@ -1,21 +1,12 @@
+
 """
-The audit log.
+Provenance Guard — Audit and Request Logging
 
-Every decision your service makes gets written here as one JSON object per
-line. Not print() — a file you can read back.
+The original audit log records classification decisions,
+appeals, and rejected requests.
 
-The reason is next unit: you run an attack against this service, and an
-attack you can't see in a log is an attack you can't diagnose.
-
-All nine fields the unit 8 rubric requires are in the entry shape from the
-start, even though unit 7 only fills some of them. That's deliberate —
-adding fields later means your early entries and your late ones have
-different shapes.
-
-    from audit import log_decision, read_entries
-
-    log_decision(content_id=..., creator_id=..., guess="ai", ...)
-    entries = read_entries(limit=50)
+The capstone adds a separate structured JSONL log for
+HTTP request monitoring and execution-time measurements.
 """
 
 import json
@@ -24,7 +15,11 @@ from datetime import datetime, timezone
 
 import config
 
+
 _lock = threading.Lock()
+
+# CAPSTONE — Separate request-level logging.
+REQUEST_LOG = config.LOG_DIR / "requests.jsonl"
 
 
 def _now() -> str:
@@ -43,19 +38,7 @@ def log_decision(
     **extra,
 ) -> dict:
     """
-    Write one decision to the audit log.
-
-    The nine required fields, all present from unit 7 whether or not you can
-    fill them yet:
-
-        timestamp, content_id, creator_id, guess,
-        model_score, style_score, combined_score, label, status
-
-    status moves over an item's life: decided when first judged,
-    under_review once the writer appeals.
-
-    Anything extra you pass gets written too — useful for rejected entries
-    in unit 8, where there's no decision but you still want the trace.
+    Write a classification decision to the audit log.
     """
     entry = {
         "timestamp": _now(),
@@ -68,16 +51,14 @@ def log_decision(
         "label": label,
         "status": status,
     }
+
     entry.update(extra)
     return _append(entry)
 
 
 def log_appeal(content_id: str, creator_id: str, reasoning: str) -> dict:
     """
-    Record an appeal beside the original decision.
-
-    This doesn't overwrite anything. The log is append-only, so the original
-    decision stays exactly where it was and the appeal sits after it.
+    Record an appeal without overwriting the original decision.
     """
     return _append({
         "timestamp": _now(),
@@ -91,8 +72,7 @@ def log_appeal(content_id: str, creator_id: str, reasoning: str) -> dict:
 
 def log_rejection(creator_id: str, reason: str, **extra) -> dict:
     """
-    Record a request that never became a decision — a rate-limit rejection
-    or an input the route refused.
+    Record requests rejected before classification.
     """
     return _append({
         "timestamp": _now(),
@@ -104,8 +84,6 @@ def log_rejection(creator_id: str, reason: str, **extra) -> dict:
     })
 
 
-# ── CAPSTONE EXTENSION — SHAPE B ───────────────────────────────────────────────
-
 def log_detector_failure(
     content_id: str,
     creator_id: str,
@@ -114,11 +92,7 @@ def log_detector_failure(
     """
     Record an unexpected detector failure.
 
-    The entry identifies the affected submission and the exception type
-    without storing the submitted text or internal exception message.
-
-    A failed detector request must not be recorded as a successful
-    classification.
+    Do not store submitted text or internal exception messages.
     """
     return _append({
         "timestamp": _now(),
@@ -126,10 +100,57 @@ def log_detector_failure(
         "creator_id": creator_id,
         "event": "detector_failure",
         "status": "failed",
-        "reason": "unexpected_detector_error",
+        "reason": "detector_unavailable",
         "error_type": error_type,
     })
 
+
+# ── CAPSTONE — Structured Request Logging ─────────────────────────────────────
+
+def log_request(
+    request_id: str,
+    endpoint: str,
+    method: str,
+    status_code: int,
+    duration_ms: float | None,
+    error_category: str | None = None,
+) -> dict:
+    """
+    Record one HTTP request as structured JSON.
+
+    Includes:
+        timestamp
+        request_id
+        endpoint
+        method
+        status_code
+        duration_ms
+        error_category
+
+    No submitted text or request body is stored.
+    """
+    entry = {
+        "timestamp": _now(),
+        "request_id": request_id,
+        "endpoint": endpoint,
+        "method": method,
+        "status_code": status_code,
+        "duration_ms": duration_ms,
+        "error_category": error_category,
+    }
+
+    config.LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+    line = json.dumps(entry, ensure_ascii=False)
+
+    with _lock:
+        with REQUEST_LOG.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+
+    return entry
+
+
+# ── Original audit file operations ────────────────────────────────────────────
 
 def _append(entry: dict) -> dict:
     config.LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -144,9 +165,9 @@ def _append(entry: dict) -> dict:
 
 def read_entries(limit: int | None = None) -> list[dict]:
     """
-    Read the log back, oldest first. limit keeps the most recent N.
+    Read audit log entries, oldest first.
 
-    A malformed line is skipped rather than raising.
+    Malformed JSON lines are skipped.
     """
     if not config.AUDIT_LOG.exists():
         return []
@@ -169,7 +190,9 @@ def read_entries(limit: int | None = None) -> list[dict]:
 
 def clear() -> int:
     """
-    Wipe the log. Handy between attack runs; returns how many went.
+    Clear the original audit log.
+
+    Request-level logs are preserved separately.
     """
     count = len(read_entries())
 
@@ -181,7 +204,7 @@ def clear() -> int:
 
 def entries_for(content_id: str) -> list[dict]:
     """
-    Every entry touching one content ID, in order.
+    Return all audit entries associated with one content ID.
     """
     return [
         e for e in read_entries()

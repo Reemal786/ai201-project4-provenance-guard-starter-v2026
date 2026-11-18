@@ -1,0 +1,1097 @@
+{
+  "project": "Provenance Guard",
+  "extension": "Shape B - Harden Against Failure",
+  "run_path": "Path B - Local with Logs",
+  "timestamp": "2026-11-18T00:43:40.138832+00:00",
+  "trial_count": 3,
+  "evaluation_method": "Flask test client with mocked detector exceptions",
+  "criteria": [
+    {
+      "criterion": 1,
+      "name": "Controlled detector failure responses",
+      "target": "3/3 cases return HTTP 503 and detector_unavailable",
+      "verdict": "MET",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "error": "detector_unavailable"
+              },
+              "observed": {
+                "status": 503,
+                "error": "detector_unavailable"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "criterion": 2,
+      "name": "Internal error information protection",
+      "target": "0/3 responses expose internal exception details",
+      "verdict": "MET",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "internal_details_exposed": false
+              },
+              "observed": {
+                "status": 503,
+                "internal_details_exposed": false,
+                "error": "detector_unavailable",
+                "response_body": "{\"error\":\"detector_unavailable\",\"message\":\"The text detector is temporarily unavailable. Please try again later.\"}\n"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "criterion": 3,
+      "name": "Detector failure audit logging",
+      "target": "3/3 failures create complete audit records",
+      "verdict": "MET",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "3652ce1c-a909-48ee-92e9-cf3fe51e39ba",
+                  "creator_id": "capstone_c3_t1_case1_d61928ac",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "015c5526-da21-4e47-b646-b10ae01baae3",
+                  "creator_id": "capstone_c3_t1_case2_1dcc662a",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "cd01ce9d-7471-458c-aa19-e607f55518a5",
+                  "creator_id": "capstone_c3_t1_case3_cbb9297e",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "c004f5bc-b218-47c0-86a9-706111fb313e",
+                  "creator_id": "capstone_c3_t2_case1_034aed45",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "0664d241-596e-4bca-abf3-c98f93293362",
+                  "creator_id": "capstone_c3_t2_case2_8de5ec68",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "219557f0-ee18-4ede-9955-e540c6483846",
+                  "creator_id": "capstone_c3_t2_case3_404faa9d",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "3eb54d87-5f13-4b97-88fe-44a9ee290feb",
+                  "creator_id": "capstone_c3_t3_case1_95c433cf",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "d8290aec-aa45-4197-b40e-64fc374ac021",
+                  "creator_id": "capstone_c3_t3_case2_a6bee6b0",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_entries": 1,
+                "event": "detector_failure",
+                "audit_status": "failed",
+                "error_type": "RuntimeError",
+                "content_id": "non-empty string"
+              },
+              "observed": {
+                "status": 503,
+                "matching_entries": 1,
+                "audit_entry": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "content_id": "3964d0b4-ff94-432d-98b0-fd4750c43d19",
+                  "creator_id": "capstone_c3_t3_case3_ed452651",
+                  "event": "detector_failure",
+                  "status": "failed",
+                  "reason": "detector_unavailable",
+                  "error_type": "RuntimeError"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "criterion": 4,
+      "name": "Existing input validation",
+      "target": "5/5 invalid submissions return HTTP 400 or 413",
+      "verdict": "MET",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "passed_cases": 5,
+          "total_cases": 5,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "empty_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "invalid_text_type",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 4,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_creator_id",
+                "status": 400,
+                "error": "invalid_creator_id",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 5,
+              "passed": true,
+              "expected": {
+                "status": 413,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "excessively_long_text",
+                "status": 413,
+                "error": "text_too_long",
+                "detector_called": false
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "passed_cases": 5,
+          "total_cases": 5,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "empty_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "invalid_text_type",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 4,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_creator_id",
+                "status": 400,
+                "error": "invalid_creator_id",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 5,
+              "passed": true,
+              "expected": {
+                "status": 413,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "excessively_long_text",
+                "status": 413,
+                "error": "text_too_long",
+                "detector_called": false
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "passed_cases": 5,
+          "total_cases": 5,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "empty_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_text",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "invalid_text_type",
+                "status": 400,
+                "error": "invalid_text",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 4,
+              "passed": true,
+              "expected": {
+                "status": 400,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "missing_creator_id",
+                "status": 400,
+                "error": "invalid_creator_id",
+                "detector_called": false
+              }
+            },
+            {
+              "case": 5,
+              "passed": true,
+              "expected": {
+                "status": 413,
+                "detector_called": false,
+                "error": "non-empty error code"
+              },
+              "observed": {
+                "input_case": "excessively_long_text",
+                "status": 413,
+                "error": "text_too_long",
+                "detector_called": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "criterion": 5,
+      "name": "Structured request logging",
+      "target": "3/3 failures create complete request records",
+      "verdict": "MET",
+      "trials": [
+        {
+          "trial": 1,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "6413be96-6e8d-417c-8fe7-1d0fcb91d891",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:39+00:00",
+                  "request_id": "6413be96-6e8d-417c-8fe7-1d0fcb91d891",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 0.923,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "e493828a-ec88-417f-a5f5-1f70b16ba83f",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "e493828a-ec88-417f-a5f5-1f70b16ba83f",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 1.716,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "6856433b-1e84-4e59-907b-054cd2ca3269",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "6856433b-1e84-4e59-907b-054cd2ca3269",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 1.645,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "1cdc98ae-196b-4d5b-8cd4-79d49a039687",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "1cdc98ae-196b-4d5b-8cd4-79d49a039687",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 2.199,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "ee57d8eb-b8ab-46d2-a716-b0c6ed419f1d",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "ee57d8eb-b8ab-46d2-a716-b0c6ed419f1d",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 1.727,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "6b72b14e-5793-4b1a-8eb8-4989cd32cb04",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "6b72b14e-5793-4b1a-8eb8-4989cd32cb04",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 2.594,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "passed": true,
+          "passed_cases": 3,
+          "total_cases": 3,
+          "cases": [
+            {
+              "case": 1,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "493cd271-0662-4cd3-a396-90a86fe96331",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "493cd271-0662-4cd3-a396-90a86fe96331",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 2.328,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 2,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "8073ec5f-12c9-477b-b159-b6a552c70905",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "8073ec5f-12c9-477b-b159-b6a552c70905",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 1.251,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            },
+            {
+              "case": 3,
+              "passed": true,
+              "expected": {
+                "status": 503,
+                "matching_records": 1,
+                "endpoint": "/submit",
+                "method": "POST",
+                "error_category": "detector_unavailable",
+                "duration_ms": "non-negative number",
+                "timestamp": "valid ISO timestamp"
+              },
+              "observed": {
+                "status": 503,
+                "request_id": "6a39739f-e9cb-4e77-9d67-644b7c9969ba",
+                "matching_records": 1,
+                "request_record": {
+                  "timestamp": "2026-11-18T00:43:40+00:00",
+                  "request_id": "6a39739f-e9cb-4e77-9d67-644b7c9969ba",
+                  "endpoint": "/submit",
+                  "method": "POST",
+                  "status_code": 503,
+                  "duration_ms": 1.204,
+                  "error_category": "detector_unavailable"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

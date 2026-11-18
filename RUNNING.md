@@ -308,73 +308,336 @@ is evidence, and the entries you paste into your README are what unit 8 grades.
 units.
 
 
-## Capstone — Local with Logs
+## Capstone — Local with Logs (Unit 9)
 
-### Running the Capstone
+### Overview
 
-The capstone extends Provenance Guard with graceful detector failure
-handling and structured request logging.
+The capstone extends Provenance Guard using **Shape B: Harden Against Failure** and **Path B: Local with Logs**.
 
-The application continues to run locally using Flask.
+The Flask service retains its original classification, appeal, audit, and rate-limiting functionality while adding controlled HTTP 503 responses for unexpected analysis failures and structured request monitoring.
 
-Start the application:
+The original extension catches unexpected exceptions in `detector.model_signal()`. The Milestone 6 improvement also catches unexpected exceptions from `stylometry.style_signal()`, `scoring.combine_signals()`, and `scoring.score_to_label()`.
+
+Invalid requests continue to receive their existing validation responses.
+
+### Local Setup and Startup
+
+Use Python 3.13 in the activated virtual environment.
+
+In Windows Command Prompt, from the repository root:
+
+```cmd
+.venv\Scripts\activate.bat
+pip install -r requirements.txt
+python test.py
+```
+
+To run the live service, open **Terminal 1**:
 
 ```cmd
 python app.py
 ```
 
-In a second terminal, check the service:
+In **Terminal 2**, check the health endpoint:
 
 ```cmd
 curl.exe http://127.0.0.1:5000/health
 ```
 
-### Running the Capstone Tests
+The local URL is `http://127.0.0.1:5000` with the default configuration.
 
-Run the automated extension tests:
+A first real classification may need to load the GPT-2 model. The model runs locally; no hosted inference API is required.
+
+### HTTP Failure Behavior
+
+| Situation | HTTP Status | Response Error | Audit Reason |
+|---|---|---|---|
+| Invalid or missing text | 400 | `invalid_text` | Validation rejection behavior |
+| Missing creator ID | 400 | `invalid_creator_id` | Validation rejection behavior |
+| Text exceeds configured length | 413 | `text_too_long` | Validation rejection behavior |
+| Detector rejects text as too short | 400 | `text_too_short` | `detector_invalid_text` |
+| Unexpected detector exception | 503 | `detector_unavailable` | `detector_unavailable` |
+| Unexpected stylometry/scoring exception | 503 | `analysis_unavailable` | `analysis_pipeline_error` |
+
+For unexpected analysis exceptions, the API returns a generic message without exposing internal exception text.
+
+Audit records store the exception type, not the exception message or submitted text.
+
+Downstream failures are currently recorded using the existing `event: detector_failure` event name, but are distinguished by `reason: analysis_pipeline_error`.
+
+### Running the Regression Tests
+
+No Flask server is required for these tests. They use Flask's in-process test client and mocked model behavior.
+
+Run:
 
 ```cmd
 python -m unittest test_capstone.py -v
 ```
 
-These tests verify:
-- Unexpected detector failures return HTTP 503.
-- Internal exception messages are not exposed to callers.
-- Detector failures are recorded in the audit log.
-- Existing invalid-input handling remains functional.
+The seven tests verify:
 
-### Structured Request Logs
+1. Unexpected detector failures return HTTP 503.
+2. Internal detector exception messages are not exposed.
+3. Detector failures are recorded in the audit log.
+4. Existing invalid-text handling returns HTTP 400.
+5. Unexpected stylometry failures return HTTP 503.
+6. Unexpected scoring failures return HTTP 503.
+7. Downstream failures do not expose internal details and are categorized correctly in the audit log.
 
-The capstone adds a separate request log:
+**Observed final result:**
 
-`logs/requests.jsonl`
+```text
+Ran 7 tests in 0.060s
 
-Each request record contains:
-- Timestamp
-- Unique request ID
-- Endpoint and HTTP method
-- HTTP response status
-- Execution time in milliseconds
-- Error category, when applicable
+OK
+```
 
-The original `logs/audit.jsonl` remains responsible for
-classification decisions, appeals, and rejection records.
+All seven regression tests passed.
 
-### Performance Measurement
+Save reproducible test output using:
 
-Request execution time is measured using Python's
-`time.perf_counter()`.
+```cmd
+python -m unittest test_capstone.py -v > results\capstone_regression_after.txt 2>&1
+```
 
-The `duration_ms` field records elapsed request-processing time
-in milliseconds.
+The `results/capstone_regression_before.txt` file captures the pre-improvement regression test run.
 
-This measures latency rather than CPU utilization or monetary cost.
+The final `after` file captures the passing regression test run.
 
-### Limitations
+The initial regression failures and subsequent audit-reason mismatch are part of the diagnosis history.
 
-- The system runs locally rather than on a public server.
-- The GPT-2 model may take longer to load on the first request.
-- Performance depends on the computer running the application.
-- Rate limiting uses in-memory storage.
-- The HTTP 503 handler covers unexpected detector exceptions,
-  not failures in every component of the application.
+### Running the Formal Acceptance-Criteria Evaluation
+
+The original CodePath `run_eval.py` and `scenarios.py` remain available for the earlier Project 4 evaluation.
+
+The capstone uses a separate evaluation runner, `run_capstone_eval.py`, to test the five capstone acceptance criteria.
+
+Run:
+
+```cmd
+python run_capstone_eval.py --label before
+python run_capstone_eval.py --label after
+```
+
+These are separate evaluation runs.
+
+Each evaluation executes three trials for each of the five acceptance criteria, totaling **51 test cases per run**.
+
+The runner uses simulated detector exceptions and Flask's test client.
+
+It does not require a running Flask server or a downloaded model.
+
+The evaluation also isolates formal test logs in temporary files rather than clearing existing application audit logs.
+
+#### Capstone Acceptance Criteria
+
+| Criterion | Target Per Trial | Baseline | Final |
+|---|---|---|---|
+| Controlled detector failure responses | 3/3 HTTP 503 with `detector_unavailable` | MET | MET |
+| Internal exception privacy | 0/3 expose internal details | MET | MET |
+| Detector failure audit logging | 3/3 complete audit records | MET | MET |
+| Existing input validation | 5/5 invalid requests rejected without detector invocation | MET | MET |
+| Structured request logging | 3/3 complete request records | MET | MET |
+
+**Observed evaluation results:**
+
+- Baseline: 5/5 criteria MET.
+- Final: 5/5 criteria MET.
+- Baseline: 51/51 test cases passed.
+- Final: 51/51 test cases passed.
+- Three trials were completed for every criterion.
+
+The five formal criteria specifically evaluate the detector-failure extension.
+
+The seven regression tests separately verify the downstream analysis improvement.
+
+#### Evaluation Evidence
+
+Baseline evaluation:
+
+- `results/capstone_2026-11-17_194340_before.json`
+- `results/capstone_2026-11-17_194340_before.md`
+
+Final evaluation:
+
+- `results/capstone_2026-11-17_194903_after.json`
+- `results/capstone_2026-11-17_194903_after.md`
+
+Regression evidence:
+
+- `results/capstone_regression_before.txt`
+- `results/capstone_regression_after.txt`
+
+The JSON files contain individual test observations.
+
+The Markdown reports provide readable criterion-level verdicts and trial details.
+
+The original baseline evidence should remain unchanged.
+
+### Structured Logs and Request Timing
+
+The capstone maintains two separate logs.
+
+**1. Audit log**
+
+File: `logs/audit.jsonl`
+
+Records:
+
+- Classification decisions
+- Appeals
+- Rejected requests
+- Detector failures
+- Downstream analysis failures
+
+**2. Request log**
+
+File: `logs/requests.jsonl`
+
+Each request record includes:
+
+- `timestamp`
+- `request_id`
+- `endpoint`
+- `method`
+- `status_code`
+- `duration_ms`
+- `error_category`
+
+The HTTP response also includes an `X-Request-ID` header, allowing responses to be correlated with their corresponding request log records.
+
+Request duration is measured using Python's `time.perf_counter()` and recorded in milliseconds.
+
+This measures local request-processing elapsed time, not CPU utilization, end-to-end network latency, or monetary cost.
+
+The request-level logging system does not store submitted text or request bodies.
+
+### Milestone 6 — Diagnosis and Improvement
+
+#### Baseline Observation
+
+All five formal detector-failure acceptance criteria were MET during the baseline evaluation.
+
+However, these criteria did not evaluate unexpected failures in stylometry or scoring.
+
+Additional regression tests identified a weakness: unexpected exceptions in downstream analysis components could escape without controlled error handling, producing HTTP 500 responses.
+
+#### Improvement Implemented
+
+A separate exception handler was added around the downstream analysis pipeline in `app.py`.
+
+The handler protects:
+
+- `stylometry.style_signal()`
+- `scoring.combine_signals()`
+- `scoring.score_to_label()`
+- Confidence calculation
+
+Unexpected downstream exceptions now return:
+
+```json
+{
+  "error": "analysis_unavailable",
+  "message": "The analysis service is temporarily unavailable. Please try again later."
+}
+```
+
+HTTP status: `503 Service Unavailable`
+
+The audit log records the failure using:
+
+- `event: detector_failure`
+- `status: failed`
+- `reason: analysis_pipeline_error`
+- `error_type`: the exception class name
+
+Internal exception messages are not returned to the caller.
+
+The original detector failure handling and input validation remain unchanged.
+
+#### Verification
+
+After implementing the improvement:
+
+- All seven regression tests passed.
+- All five formal acceptance criteria remained MET.
+- All 51 formal test cases passed.
+- No regression was detected in the original capstone criteria.
+
+The results demonstrate that the identified failure paths are handled under the tested conditions.
+
+They do not establish production-wide fault tolerance.
+
+### Cost, Feasibility, and Limitations
+
+#### Hosting Feasibility
+
+The GPT-2 model weights occupy approximately 550 MB on disk, before accounting for PyTorch, Flask, and runtime memory.
+
+The original starter documentation notes that a 512 MB free hosting tier cannot accommodate the complete service.
+
+For this reason, the capstone uses **Path B: Local with Logs** rather than deploying the full application to that constrained hosting environment.
+
+#### Direct Inference Cost
+
+The detector runs locally rather than through a paid hosted inference API.
+
+There is no per-request API charge in this workflow.
+
+However, local computing resources, electricity, and storage still have costs.
+
+#### Performance Limitations
+
+The first real submission may take longer because the model must load into memory.
+
+Execution time depends on the computer running the application.
+
+The formal evaluation uses mocked failures and does not benchmark real model inference or network latency.
+
+#### Remaining Failure Risks
+
+The application now handles unexpected exceptions in the detector, stylometry, and scoring components.
+
+However, failures in other components, including disk-full conditions or exceptions during audit and request logging, are not guaranteed to produce controlled responses.
+
+#### Evaluation Limitations
+
+The regression and formal evaluations use simulated exceptions and Flask's in-process test client.
+
+They do not measure:
+
+- Real production outage frequency
+- Concurrent request performance
+- Reliability under sustained traffic
+- Real-world network latency
+- Production deployment behavior
+
+#### Detection Limitations
+
+Text predictability is not proof of authorship.
+
+Plain language, writing style, and deliberate formatting changes may influence the detector or stylometry signals.
+
+False positives remain possible, and classification results should not be treated as definitive proof that text was generated by AI.
+
+### Final Verification Commands
+
+From the repository root, with the virtual environment activated:
+
+```cmd
+python test.py
+python -m unittest test_capstone.py -v
+python run_capstone_eval.py --label after
+```
+
+To test the live service separately, start the application in Terminal 1:
+
+```cmd
+python app.py
+```
+
+Then use `curl.exe` from Terminal 2 to interact with the endpoints.
+
+The final README summary and evidence discussion should be completed after implementation and evaluation are finalized.
+

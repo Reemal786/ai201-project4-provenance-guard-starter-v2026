@@ -29,13 +29,11 @@ import stylometry
 app = Flask(__name__)
 
 
-# ── CAPSTONE — Request monitoring ─────────────────────────────────────────────
+# ── CAPSTONE — Request monitoring ─────────────────────────────
 
 @app.before_request
 def start_request():
-    """
-    Assign each request a unique ID and start a monotonic timer.
-    """
+    """Assign a request ID and start a monotonic timer."""
     g.request_id = str(uuid.uuid4())
     g.start_time = time.perf_counter()
 
@@ -45,8 +43,8 @@ def record_request(response):
     """
     Record request timing, status, and error category.
 
-    Request logs are separate from the existing decision audit log.
-    Submitted text and request bodies are never included.
+    Request logs are separate from the decision audit log.
+    Submitted text and request bodies are not included.
     """
     start = getattr(g, "start_time", None)
 
@@ -60,6 +58,7 @@ def record_request(response):
 
     if response.status_code >= 400:
         payload = response.get_json(silent=True)
+
         if isinstance(payload, dict):
             error_category = payload.get("error")
 
@@ -67,7 +66,11 @@ def record_request(response):
             error_category = "http_error"
 
     audit.log_request(
-        request_id=getattr(g, "request_id", str(uuid.uuid4())),
+        request_id=getattr(
+            g,
+            "request_id",
+            str(uuid.uuid4()),
+        ),
         endpoint=request.path,
         method=request.method,
         status_code=response.status_code,
@@ -76,13 +79,14 @@ def record_request(response):
     )
 
     response.headers["X-Request-ID"] = g.request_id
+
     return response
 
 
-# ── Rate limiting — UNIT 8 ────────────────────────────────────────────────────
+# ── Rate limiting — UNIT 8 ────────────────────────────────────
 
 class _LimiterOff:
-    """Placeholder limiter used when rate limiting is disabled."""
+    """Placeholder when rate limiting is disabled."""
 
     def limit(self, *args, **kwargs):
         return lambda view: view
@@ -124,19 +128,24 @@ if config.RATE_LIMITING_ENABLED:
             payload = {}
 
         audit.log_rejection(
-            creator_id=payload.get("creator_id", "unknown"),
+            creator_id=payload.get(
+                "creator_id",
+                "unknown",
+            ),
             reason="rate_limited",
             limit=str(exc.description),
         )
 
         return jsonify({
             "error": "rate_limited",
-            "message": "Too many submissions. Try again shortly.",
+            "message": (
+                "Too many submissions. Try again shortly."
+            ),
             "limit": str(exc.description),
         }), 429
 
 
-# ── Worked example — leave unchanged ─────────────────────────────────────────
+# ── Worked example — leave unchanged ─────────────────────────
 
 @app.post("/ping")
 def ping():
@@ -150,11 +159,11 @@ def ping():
     })
 
 
-# ── Health check ──────────────────────────────────────────────────────────────
+# ── Health check ──────────────────────────────────────────────
 
 @app.get("/health")
 def health():
-    """Check whether the service is running and the model is loaded."""
+    """Check service status and model loading."""
     loaded = detector._model is not None
 
     return jsonify({
@@ -166,7 +175,7 @@ def health():
     })
 
 
-# ── Submission endpoint ───────────────────────────────────────────────────────
+# ── Submission endpoint ───────────────────────────────────────
 
 @app.post("/submit")
 @limiter.limit(
@@ -175,41 +184,51 @@ def health():
 )
 def submit():
     """
-    Accept text, calculate detection signals, classify the writing,
+    Accept text, calculate detection signals, classify writing,
     and record the decision.
     """
 
-    # Step 1: Read the JSON request.
+    # Step 1: Read JSON.
     payload = request.get_json(silent=True)
 
     if not isinstance(payload, dict):
         return jsonify({
             "error": "invalid_request",
-            "message": "The request body must be a JSON object.",
+            "message": (
+                "The request body must be a JSON object."
+            ),
         }), 400
 
-    # Step 2: Extract the text and creator ID.
+    # Step 2: Extract fields.
     text = payload.get("text")
     creator_id = payload.get("creator_id")
 
-    # Step 3: Validate the text.
+    # Step 3: Validate text.
     if not isinstance(text, str) or not text.strip():
         return jsonify({
             "error": "invalid_text",
-            "message": "The text field must be a non-empty string.",
+            "message": (
+                "The text field must be a non-empty string."
+            ),
         }), 400
 
-    # Step 4: Validate the creator ID.
-    if not isinstance(creator_id, str) or not creator_id.strip():
+    # Step 4: Validate creator ID.
+    if (
+        not isinstance(creator_id, str)
+        or not creator_id.strip()
+    ):
         return jsonify({
             "error": "invalid_creator_id",
-            "message": "The creator_id field must be a non-empty string.",
+            "message": (
+                "The creator_id field must be "
+                "a non-empty string."
+            ),
         }), 400
 
     text = text.strip()
     creator_id = creator_id.strip()
 
-    # Step 5: Reject excessively long text.
+    # Step 5: Validate length.
     if len(text) > config.MAX_TEXT_LENGTH:
         return jsonify({
             "error": "text_too_long",
@@ -219,10 +238,10 @@ def submit():
             ),
         }), 413
 
-    # Step 6: Generate a unique content ID.
+    # Step 6: Generate content ID.
     content_id = str(uuid.uuid4())
 
-    # Step 7: Calculate the model signal.
+    # Step 7: Calculate the detector signal.
     try:
         model_score = detector.model_signal(text)
 
@@ -238,7 +257,7 @@ def submit():
             "message": str(exc),
         }), 400
 
-    # CAPSTONE SHAPE B — Graceful detector failure handling.
+    # Original capstone extension: detector failure handling.
     except Exception as exc:
         audit.log_detector_failure(
             content_id=content_id,
@@ -254,21 +273,54 @@ def submit():
             ),
         }), 503
 
-    style_score = stylometry.style_signal(text)
+    # ── MILESTONE 6 IMPROVEMENT ────────────────────────────────
+    #
+    # Protect the downstream analysis pipeline.
+    #
+    # Previously, an unexpected exception in stylometry or
+    # scoring could escape and produce HTTP 500.
+    #
+    # Now these failures produce a controlled HTTP 503
+    # response and a categorized audit record.
 
-    # Step 8: Combine the signals.
-    combined_score = scoring.combine_signals(
-        model_score,
-        style_score,
-    )
+    try:
+        # Step 8: Calculate stylometry signal.
+        style_score = stylometry.style_signal(text)
 
-    # Step 9: Assign the final classification.
-    guess, label = scoring.score_to_label(combined_score)
+        # Step 9: Combine both signals.
+        combined_score = scoring.combine_signals(
+            model_score,
+            style_score,
+        )
 
-    # Classification strength, not probability of authorship.
-    confidence = round(abs(combined_score - 0.5) * 2, 4)
+        # Step 10: Determine classification.
+        guess, label = scoring.score_to_label(
+            combined_score
+        )
 
-    # Step 10: Record the complete decision.
+        # Step 11: Calculate confidence.
+        confidence = round(
+            abs(combined_score - 0.5) * 2,
+            4,
+        )
+
+    except Exception as exc:
+        audit.log_detector_failure(
+            content_id=content_id,
+            creator_id=creator_id,
+            error_type=type(exc).__name__,
+            reason="analysis_pipeline_error",
+        )
+
+        return jsonify({
+            "error": "analysis_unavailable",
+            "message": (
+                "The analysis service is temporarily "
+                "unavailable. Please try again later."
+            ),
+        }), 503
+
+    # Step 12: Record successful decision.
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
@@ -279,7 +331,7 @@ def submit():
         label=label,
     )
 
-    # Step 11: Return the result.
+    # Step 13: Return classification.
     return jsonify({
         "content_id": content_id,
         "guess": guess,
@@ -290,54 +342,68 @@ def submit():
     })
 
 
-# ── Appeal endpoint ───────────────────────────────────────────────────────────
+# ── Appeal endpoint ───────────────────────────────────────────
 
 @app.post("/appeal")
 def appeal():
     """Allow a writer to challenge an existing classification."""
 
-    # Step 1: Read the JSON request.
+    # Step 1: Read JSON.
     payload = request.get_json(silent=True)
 
     if not isinstance(payload, dict):
         return jsonify({
             "error": "invalid_request",
-            "message": "The request body must be a JSON object.",
+            "message": (
+                "The request body must be a JSON object."
+            ),
         }), 400
 
-    # Step 2: Extract appeal information.
+    # Step 2: Extract fields.
     content_id = payload.get("content_id")
     reasoning = payload.get("reasoning")
 
     # Step 3: Validate content ID.
-    if not isinstance(content_id, str) or not content_id.strip():
+    if (
+        not isinstance(content_id, str)
+        or not content_id.strip()
+    ):
         return jsonify({
             "error": "invalid_content_id",
             "message": "A valid content_id is required.",
         }), 400
 
     # Step 4: Validate reasoning.
-    if not isinstance(reasoning, str) or not reasoning.strip():
+    if (
+        not isinstance(reasoning, str)
+        or not reasoning.strip()
+    ):
         return jsonify({
             "error": "invalid_reasoning",
-            "message": "Please explain why you are appealing this decision.",
+            "message": (
+                "Please explain why you are appealing "
+                "this decision."
+            ),
         }), 400
 
     content_id = content_id.strip()
     reasoning = reasoning.strip()
 
-    # Step 5: Find the original submission.
+    # Step 5: Find original submission.
     entries = audit.entries_for(content_id)
 
     decisions = [
-        entry for entry in entries
+        entry
+        for entry in entries
         if entry.get("status") == "decided"
     ]
 
     if not decisions:
         return jsonify({
             "error": "content_not_found",
-            "message": "No submission was found with this content ID.",
+            "message": (
+                "No submission was found with this content ID."
+            ),
         }), 404
 
     # Step 6: Retrieve creator ID.
@@ -353,27 +419,33 @@ def appeal():
     if already_appealed:
         return jsonify({
             "error": "already_appealed",
-            "message": "An appeal has already been submitted for this content.",
+            "message": (
+                "An appeal has already been submitted "
+                "for this content."
+            ),
             "content_id": content_id,
             "status": "under_review",
         }), 409
 
-    # Step 8: Record the appeal.
+    # Step 8: Record appeal.
     audit.log_appeal(
         content_id=content_id,
         creator_id=creator_id,
         reasoning=reasoning,
     )
 
-    # Step 9: Confirm the appeal.
+    # Step 9: Confirm appeal.
     return jsonify({
         "content_id": content_id,
         "status": "under_review",
-        "message": "Your appeal has been recorded and is awaiting review.",
+        "message": (
+            "Your appeal has been recorded and "
+            "is awaiting review."
+        ),
     })
 
 
-# ── Audit log ─────────────────────────────────────────────────────────────────
+# ── Audit log ─────────────────────────────────────────────────
 
 @app.get("/log")
 def get_log():
@@ -388,18 +460,30 @@ def get_log():
     })
 
 
-# ── Start the Flask application ───────────────────────────────────────────────
+# ── Start Flask ───────────────────────────────────────────────
 
 def main():
-    print(f"Provenance Guard on http://{config.HOST}:{config.PORT}")
+    print(
+        f"Provenance Guard on "
+        f"http://{config.HOST}:{config.PORT}"
+    )
+
     print(f"  detector model:  {config.DETECTOR_MODEL}")
-    print(f"  rate limiting:   {'ON' if config.RATE_LIMITING_ENABLED else 'off'}")
+    print(
+        f"  rate limiting:   "
+        f"{'ON' if config.RATE_LIMITING_ENABLED else 'off'}"
+    )
     print(f"  audit log:       {config.AUDIT_LOG}")
-    print(f"  request log:     {config.LOG_DIR / 'requests.jsonl'}")
+    print(
+        f"  request log:     "
+        f"{config.LOG_DIR / 'requests.jsonl'}"
+    )
     print()
 
     print("Check it's alive:")
-    print(f"  curl http://{config.HOST}:{config.PORT}/health")
+    print(
+        f"  curl http://{config.HOST}:{config.PORT}/health"
+    )
     print()
 
     app.run(

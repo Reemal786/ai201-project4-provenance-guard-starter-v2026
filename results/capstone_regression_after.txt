@@ -1,0 +1,19 @@
+test_detector_failure_is_logged (test_capstone.TestCapstoneExtension.test_detector_failure_is_logged)
+Unexpected detector failures create audit entries. ... ok
+test_detector_failure_returns_503 (test_capstone.TestCapstoneExtension.test_detector_failure_returns_503)
+Unexpected detector exceptions return HTTP 503. ... ok
+test_downstream_failure_is_private_and_logged (test_capstone.TestCapstoneExtension.test_downstream_failure_is_private_and_logged)
+Downstream failures must be private and auditable. ... ok
+test_existing_invalid_text_behavior (test_capstone.TestCapstoneExtension.test_existing_invalid_text_behavior)
+Empty text still returns HTTP 400. ... ok
+test_failure_does_not_expose_internal_error (test_capstone.TestCapstoneExtension.test_failure_does_not_expose_internal_error)
+Internal detector exception details remain private. ... ok
+test_scoring_failure_returns_503 (test_capstone.TestCapstoneExtension.test_scoring_failure_returns_503)
+Unexpected scoring exceptions return HTTP 503. ... ok
+test_stylometry_failure_returns_503 (test_capstone.TestCapstoneExtension.test_stylometry_failure_returns_503)
+Unexpected stylometry exceptions return HTTP 503. ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.067s
+
+OK

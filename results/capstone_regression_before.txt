@@ -1,0 +1,128 @@
+test_detector_failure_is_logged (test_capstone.TestCapstoneExtension.test_detector_failure_is_logged)
+Unexpected detector failures create audit entries. ... ok
+test_detector_failure_returns_503 (test_capstone.TestCapstoneExtension.test_detector_failure_returns_503)
+Unexpected detector exceptions return HTTP 503. ... ok
+test_downstream_failure_is_private_and_logged (test_capstone.TestCapstoneExtension.test_downstream_failure_is_private_and_logged)
+Downstream failures must be private and auditable. ... [2026-11-17 19:46:52,342] ERROR in app: Exception on /submit [POST]
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask_limiter\extension.py", line 1314, in __inner
+    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\app.py", line 266, in submit
+    guess, label = scoring.score_to_label(combined_score)
+                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+RuntimeError: PRIVATE_INTERNAL_SCORING_ERROR
+FAIL
+test_existing_invalid_text_behavior (test_capstone.TestCapstoneExtension.test_existing_invalid_text_behavior)
+Empty text still returns HTTP 400. ... ok
+test_failure_does_not_expose_internal_error (test_capstone.TestCapstoneExtension.test_failure_does_not_expose_internal_error)
+Internal detector exception details remain private. ... ok
+test_scoring_failure_returns_503 (test_capstone.TestCapstoneExtension.test_scoring_failure_returns_503)
+Unexpected scoring exceptions return HTTP 503. ... [2026-11-17 19:46:52,351] ERROR in app: Exception on /submit [POST]
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask_limiter\extension.py", line 1314, in __inner
+    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\app.py", line 260, in submit
+    combined_score = scoring.combine_signals(
+        model_score,
+        style_score,
+    )
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+RuntimeError: Simulated scoring failure
+FAIL
+test_stylometry_failure_returns_503 (test_capstone.TestCapstoneExtension.test_stylometry_failure_returns_503)
+Unexpected stylometry exceptions return HTTP 503. ... [2026-11-17 19:46:52,353] ERROR in app: Exception on /submit [POST]
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\.venv\Lib\site-packages\flask_limiter\extension.py", line 1314, in __inner
+    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\app.py", line 257, in submit
+    style_score = stylometry.style_signal(text)
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\hoorr\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1234, in _execute_mock_call
+    raise effect
+RuntimeError: Simulated stylometry failure
+FAIL
+
+======================================================================
+FAIL: test_downstream_failure_is_private_and_logged (test_capstone.TestCapstoneExtension.test_downstream_failure_is_private_and_logged)
+Downstream failures must be private and auditable.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\test_capstone.py", line 197, in test_downstream_failure_is_private_and_logged
+    self.assertEqual(response.status_code, 503)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 500 != 503
+
+======================================================================
+FAIL: test_scoring_failure_returns_503 (test_capstone.TestCapstoneExtension.test_scoring_failure_returns_503)
+Unexpected scoring exceptions return HTTP 503.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\test_capstone.py", line 167, in test_scoring_failure_returns_503
+    self.assertEqual(response.status_code, 503)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 500 != 503
+
+======================================================================
+FAIL: test_stylometry_failure_returns_503 (test_capstone.TestCapstoneExtension.test_stylometry_failure_returns_503)
+Unexpected stylometry exceptions return HTTP 503.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\hoorr\Documents\ai201-project4-provenance-guard-starter-v2026\test_capstone.py", line 138, in test_stylometry_failure_returns_503
+    self.assertEqual(response.status_code, 503)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 500 != 503
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.045s
+
+FAILED (failures=3)

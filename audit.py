@@ -7,6 +7,10 @@ appeals, and rejected requests.
 
 The capstone adds a separate structured JSONL log for
 HTTP request monitoring and execution-time measurements.
+
+Milestone 6:
+Distinguish detector failures from downstream analysis
+pipeline failures without exposing internal error messages.
 """
 
 import json
@@ -56,7 +60,11 @@ def log_decision(
     return _append(entry)
 
 
-def log_appeal(content_id: str, creator_id: str, reasoning: str) -> dict:
+def log_appeal(
+    content_id: str,
+    creator_id: str,
+    reasoning: str,
+) -> dict:
     """
     Record an appeal without overwriting the original decision.
     """
@@ -70,7 +78,11 @@ def log_appeal(content_id: str, creator_id: str, reasoning: str) -> dict:
     })
 
 
-def log_rejection(creator_id: str, reason: str, **extra) -> dict:
+def log_rejection(
+    creator_id: str,
+    reason: str,
+    **extra,
+) -> dict:
     """
     Record requests rejected before classification.
     """
@@ -88,11 +100,19 @@ def log_detector_failure(
     content_id: str,
     creator_id: str,
     error_type: str,
+    reason: str = "detector_unavailable",
 ) -> dict:
     """
-    Record an unexpected detector failure.
+    Record an unexpected detector or analysis failure.
 
-    Do not store submitted text or internal exception messages.
+    The default reason preserves the original detector
+    failure behavior.
+
+    Downstream analysis failures can specify:
+        reason="analysis_pipeline_error"
+
+    Submitted text and internal exception messages
+    are never stored.
     """
     return _append({
         "timestamp": _now(),
@@ -100,12 +120,12 @@ def log_detector_failure(
         "creator_id": creator_id,
         "event": "detector_failure",
         "status": "failed",
-        "reason": "detector_unavailable",
+        "reason": reason,
         "error_type": error_type,
     })
 
 
-# ── CAPSTONE — Structured Request Logging ─────────────────────────────────────
+# ── CAPSTONE — Structured Request Logging ─────────────────────
 
 def log_request(
     request_id: str,
@@ -150,7 +170,7 @@ def log_request(
     return entry
 
 
-# ── Original audit file operations ────────────────────────────────────────────
+# ── Original audit file operations ────────────────────────────
 
 def _append(entry: dict) -> dict:
     config.LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -174,7 +194,9 @@ def read_entries(limit: int | None = None) -> list[dict]:
 
     entries = []
 
-    for line in config.AUDIT_LOG.read_text(encoding="utf-8").splitlines():
+    for line in config.AUDIT_LOG.read_text(
+        encoding="utf-8"
+    ).splitlines():
         line = line.strip()
 
         if not line:
@@ -207,6 +229,6 @@ def entries_for(content_id: str) -> list[dict]:
     Return all audit entries associated with one content ID.
     """
     return [
-        e for e in read_entries()
-        if e.get("content_id") == content_id
+        entry for entry in read_entries()
+        if entry.get("content_id") == content_id
     ]

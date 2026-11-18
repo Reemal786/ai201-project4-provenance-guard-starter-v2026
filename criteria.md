@@ -124,3 +124,71 @@ A reliable service must handle unexpected or malformed input safely. I chose a 1
      A number you missed stays where it is, gets diagnosed, and gets a fix
      attempted. That's where the points are.
      ───────────────────────────────────────────────────────────────────────── -->
+
+---
+
+# Capstone Acceptance Criteria — Detector Failure Handling
+
+**Project:** Provenance Guard  
+**Extension:** Shape B — Harden Against Failure  
+**Run Path:** Path B — Local with Logs
+
+These five acceptance criteria evaluate the new detector failure-handling extension and confirm that existing functionality remains operational.
+
+Each criterion must be evaluated across three independent trials. A criterion is MET only when its stated target is satisfied in all three trials.
+
+## 1. Return a controlled response when the detector fails
+
+When an unexpected exception is simulated in `detector.model_signal()`, the `/submit` endpoint must return HTTP 503 with the error code `detector_unavailable` in all 3 test cases per trial.
+
+**Why this target:**
+
+An unexpected detector failure should not cause the application to return an uncontrolled server error. I chose a 100% success target because handling unexpected exceptions reliably is the primary purpose of this extension.
+
+## 2. Prevent internal error information from reaching users
+
+For 3 simulated detector failures containing distinct internal error messages, none of the HTTP responses may expose the original exception message, traceback, or other internal debugging information in any trial.
+
+**Why this target:**
+
+Internal error details may expose sensitive implementation information and confuse users. A controlled response should explain that the service is temporarily unavailable without revealing technical details that are only relevant to developers.
+
+## 3. Record every unexpected detector failure
+
+For 3 simulated detector failures per trial, all 3 must generate a corresponding entry in `logs/audit.jsonl` containing the event `detector_failure`, the status `failed`, and the exception type.
+
+**Why this target:**
+
+Failures must remain observable even when they are handled gracefully. I chose a 100% logging target because missing failure records would make it difficult to diagnose recurring issues and determine whether the extension is functioning correctly.
+
+## 4. Preserve existing invalid-input validation
+
+For 5 invalid submissions per trial, including empty text, missing text, invalid data types, missing creator IDs, and excessively long text, all 5 must return an appropriate HTTP 400 or 413 response without invoking the detector or crashing the service.
+
+**Why this target:**
+
+Adding detector failure handling should not interfere with validation that was already implemented in the original project. A 100% target ensures the extension does not introduce regressions in existing functionality.
+
+## 5. Produce structured logs for failed requests
+
+For 3 simulated detector failures per trial, all 3 must create corresponding records in `logs/requests.jsonl` containing a unique request ID, endpoint, HTTP method, status code 503, execution time in milliseconds, and error category `detector_unavailable`.
+
+**Why this target:**
+
+Structured request logs provide measurable evidence that the system is handling and recording failures consistently. Requiring complete records for every failure makes it possible to investigate errors and compare execution times without relying on unstructured console output.
+
+---
+
+## Evaluation Requirements
+
+Each criterion will be tested in three independent trials.
+
+The evaluation will record:
+
+- Expected behavior
+- Observed behavior
+- Number of successful test cases
+- MET or MISSED verdict
+- Explanation of any failures
+
+If a criterion is missed, the result will be documented rather than lowering the original target. At least one identified issue will be investigated, improved, and retested.
